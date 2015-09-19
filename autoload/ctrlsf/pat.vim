@@ -2,7 +2,7 @@
 " Description: An ack/ag powered code search and view tool.
 " Author: Ye Ding <dygvirus@gmail.com>
 " Licence: Vim licence
-" Version: 1.20
+" Version: 1.30
 " ============================================================================
 
 " s:TranslateRegex()
@@ -34,6 +34,11 @@ func! s:TranslateRegex(pattern) abort
     let pattern = substitute(pattern, '\v\(\?\<\=(.{-})\)', '(\1)@<=', 'g')
     let pattern = substitute(pattern, '\v\(\?\<!(.{-})\)', '(\1)@<!', 'g')
     let pattern = substitute(pattern, '\v\(\?\>(.{-})\)', '(\1)@>', 'g')
+
+    " '\b' word boundary
+    let pattern = substitute(pattern, '\\b', '(<|>)', 'g')
+
+    " TODO:'\B' support
 
     return pattern
 endf

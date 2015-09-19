@@ -2,7 +2,7 @@
 " Description: An ack/ag powered code search and view tool.
 " Author: Ye Ding <dygvirus@gmail.com>
 " Licence: Vim licence
-" Version: 1.20
+" Version: 1.30
 " ============================================================================
 
 " s:Echo()
@@ -11,12 +11,13 @@
 " {format}  format same as printf()
 " {argv}    list of values that will be bound to format
 " {hlgroup} highlight group used to print message
-" {save}    if save this message to history
+" {save}    whether to save this message to history
 "
 func! s:Echo(format, argv, hlgroup, save) abort
-    let message = s:Printf(a:format, a:argv)
+    let echo = a:save ? "echom" : "echo"
+    let messages = split(s:Printf(a:format, a:argv), "\n")
     exec 'echohl ' . a:hlgroup
-    exec (a:save ? "echom" : "echo") . " message"
+    for mes in messages | exec echo . " mes" | endfo
     echohl None
 endf
 

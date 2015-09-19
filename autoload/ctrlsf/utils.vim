@@ -2,7 +2,7 @@
 " Description: An ack/ag powered code search and view tool.
 " Author: Ye Ding <dygvirus@gmail.com>
 " Licence: Vim licence
-" Version: 1.20
+" Version: 1.30
 " ============================================================================
 
 """""""""""""""""""""""""""""""""
@@ -49,14 +49,10 @@ endf
 " Time()
 "
 func! ctrlsf#utils#Time(command) abort
-    let [precmd_s, precmd_us] = reltime()
+    let start = reltime()
     exec a:command
-    let [postcmd_s, postcmd_us] = reltime()
-
-    let t = (postcmd_s - precmd_s) +
-                \ (postcmd_us - precmd_us) * pow(0.1, len(postcmd_us))
-
-    echom printf("Time: %f, for command %s", t, a:command)
+    let elapsed = reltime(start)
+    echom printf("Time: %s, For Command: %s", reltimestr(elapsed), a:command)
 endf
 
 """""""""""""""""""""""""""""""""
