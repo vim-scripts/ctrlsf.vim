@@ -2,7 +2,7 @@
 " Description: An ack/ag powered code search and view tool.
 " Author: Ye Ding <dygvirus@gmail.com>
 " Licence: Vim licence
-" Version: 1.10
+" Version: 1.20
 " ============================================================================
 
 " BuildCommand()
@@ -47,9 +47,9 @@ func! s:BuildCommand(args) abort
 
     " default
     if g:ctrlsf_ackprg =~# 'ag'
-        call add(tokens, '--heading --group --nocolor --nobreak')
+        call add(tokens, '--noheading --nogroup --nocolor --nobreak')
     else
-        call add(tokens, '--heading --group --nocolor --nobreak --nocolumn')
+        call add(tokens, '--noheading --nogroup --nocolor --nobreak --nocolumn')
     endif
 
     " pattern (including escape)

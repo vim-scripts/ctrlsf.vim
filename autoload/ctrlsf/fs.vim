@@ -2,7 +2,7 @@
 " Description: An ack/ag powered code search and view tool.
 " Author: Ye Ding <dygvirus@gmail.com>
 " Licence: Vim licence
-" Version: 1.10
+" Version: 1.20
 " ============================================================================
 
 " Meta folder of several typical version control systems
@@ -23,4 +23,23 @@ func! ctrlsf#fs#FindVcsRoot() abort
     call ctrlsf#log#Debug("ProjectRoot: %s", root)
 
     return root
+endf
+
+" DetectFileFormat
+"
+" Determine file's format by <EOL>.
+"
+" Possilble format is 'dos' and 'unix', 'mac' is NOT supported.
+"
+func! ctrlsf#fs#DetectFileFormat(path) abort
+    let sample = readfile(a:path, 'b', 1)
+
+    if stridx(sample[0], "\r") != -1
+        let fmt = "dos"
+    else
+        let fmt = "unix"
+    endif
+
+    call ctrlsf#log#Debug("FileFormat: '%s' for file %s", fmt, a:path)
+    return fmt
 endf

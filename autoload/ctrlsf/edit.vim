@@ -2,7 +2,7 @@
 " Description: An ack/ag powered code search and view tool.
 " Author: Ye Ding <dygvirus@gmail.com>
 " Licence: Vim licence
-" Version: 1.10
+" Version: 1.20
 " ============================================================================
 
 " s:DiffFile()
@@ -57,6 +57,7 @@ func! s:Diff(orig, modi) abort
                 \ "orig": file_orig,
                 \ "modi": file_modi
                 \ })
+            call ctrlsf#log#Debug("ChangedFile: %s", file_orig.file)
         endif
     endwh
 
@@ -67,13 +68,16 @@ endf
 "
 " Check if a file in resultset is different from its disk counterpart.
 "
-func! s:VerifyConsistent(buffer, orig)
-    for par in a:orig.paragraphs
+func! s:VerifyConsistent(on_disk, on_mem)
+    for par in a:on_mem.paragraphs
         for i in range(par.range())
             let ln = par.lnum() + i
             let line = par.lines[i]
 
-            if line.content !=# a:buffer[ln-1]
+            if line.content !=# a:on_disk[ln-1]
+                call ctrlsf#log#Debug("InconsistentContent: [Lnum]: %d,
+                            \ [FileInMem]: %s, [FileOnDisk]: %s",
+                            \ ln, line.content, a:on_disk[ln-1])
                 return 0
             endif
         endfo
@@ -173,10 +177,17 @@ func! s:SaveFile(orig, modi) abort
         let offset += s:WriteParagraph(buffer, opar, mpar, offset)
     endwh
 
+    " append <CR> to each line when file's format is 'dos'
+    if ctrlsf#fs#DetectFileFormat(file) == 'dos'
+        for i in range(len(buffer))
+            let buffer[i] .= "\r"
+        endfo
+    endif
+
     if writefile(buffer, file) == -1
         call ctrlsf#log#Error("Failed to write file %s", file)
     else
-        call ctrlsf#log#Debug("Writing file %s succeed.", file)
+        call ctrlsf#log#Debug("WritingFile: %s succeed.", file)
     endif
 endf
 
@@ -189,7 +200,14 @@ func! ctrlsf#edit#Save()
     " clear cache (not very clean code I should say)
     call ctrlsf#db#ClearCache()
 
-    let changed = s:Diff(orig, modi)
+    try
+        let changed = s:Diff(orig, modi)
+    catch /InconsistentException/
+        call ctrlsf#log#Error("CtrlSF's write buffer is corrupted. Note that
+                            \ you can't insert line/delete block/delete entire
+                            \ file in edit mode.")
+        return -1
+    endtry
 
     " prompt to confirm save
     if g:ctrlsf_confirm_save
